@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Contenedor principal */
+        #contenedor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            background-color: #fff;
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilos del video */
+        video {
+            width: 500px;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+        }
+
+        /* Controles de botones */
+        #controles {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Estilos de los botones */
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Estado de la cámara */
+        #estado {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Imagen capturada */
+        #foto {
+            display: none;
+            margin-top: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+        }
+    </style>
+    <title>Webcam Mejorada</title>
+</head>
+
+<body>
+
+    <div id="contenedor">
+        <video id="video" muted autoplay></video>
+        <div id="controles">
+            <button id="iniciar">Iniciar Webcam</button>
+            <button id="capturar">Capturar Foto</button>
+            <button id="detener">Detener Webcam</button>
+        </div>
+        <p id="estado">Estado: Cámara detenida</p>
+        <img id="foto" alt="Captura de la webcam">
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const iniciarBtn = document.getElementById("iniciar");
+            const capturarBtn = document.getElementById("capturar");
+            const detenerBtn = document.getElementById("detener");
+            const video = document.getElementById("video");
+            const estado = document.getElementById("estado");
+            const foto = document.getElementById("foto");
+            let stream;
+
+            iniciarBtn.addEventListener("click", () => {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+                    .then(mediaStream => {
+                        stream = mediaStream;
+                        video.srcObject = stream;
+                        estado.textContent = "Estado: Cámara activa";
+                    })
+                    .catch(error => {
+                        alert("Error al acceder a la cámara: " + error.message);
+                    });
+            });
+
+            capturarBtn.addEventListener("click", () => {
+                if (!stream) {
+                    alert("Primero inicia la webcam.");
+                    return;
+                }
+                const canvas = document.createElement("canvas");
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                foto.src = canvas.toDataURL("image/png");
+                foto.style.display = "block";
+            });
+
+            detenerBtn.addEventListener("click", () => {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    video.srcObject = null;
+                    estado.textContent = "Estado: Cámara detenida";
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
